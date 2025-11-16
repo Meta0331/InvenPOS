@@ -1,0 +1,153 @@
+{% extends 'navigation/navbar.html' %}
+
+{% block title %}Cahsier Management{% endblock %}
+
+{% block content %}
+
+
+<!-- CASHIER MANAGEMENT SECTION -->
+<div class="products-container">
+  <div class="page-header">
+    <h2 class="page-title">Cashier Management</h2>
+    <button class="btn-add-product" data-bs-toggle="modal" data-bs-target="#addCashierModal">
+      + Add Cashier
+    </button>
+  </div>
+
+  <!-- CASHIER STAT CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>{{ total_cashiers }}</h3>
+      <p>Total Cashiers</p>
+    </div>
+    <div class="stat-card">
+      <h3>{{ active_cashiers }}</h3>
+      <p>Active Cashiers</p>
+    </div>
+  </div>
+
+  <!-- CASHIER TABLE -->
+  <div class="table-wrapper">
+    <table class="supplier-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Date Joined</th>
+          <th>Last Login</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cashier in cashiers %}
+        <tr>
+          <td>{{ cashier.username }}</td>
+          <td>{{ cashier.email }}</td>
+          <td>{{ cashier.first_name }}</td>
+          <td>{{ cashier.last_name }}</td>
+          <td>{{ cashier.date_joined|date:"M d, Y" }}</td>
+          <td>
+            {% if cashier.last_login %}
+              {{ cashier.last_login|date:"M d, Y" }}
+            {% else %}
+              Never
+            {% endif %}
+          </td>
+          <td>
+            {% if cashier.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-danger">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="action-buttons">
+
+              {% if cashier.is_active %}
+                <a href="{% url 'pages:deactivate_cashier' cashier.id %}" 
+                   class="btn-action btn-view"
+                   onclick="return confirm('Deactivate cashier {{ cashier.username }}?');">
+                   Deactivate
+                </a>
+              {% else %}
+                <a href="{% url 'pages:activate_cashier' cashier.id %}" 
+                   class="btn-action btn-activate"
+                   onclick="return confirm('Activate cashier {{ cashier.username }}?');">
+                   Activate
+                </a>
+              {% endif %}
+                            <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editCashierModal{{ cashier.id }}">
+                Edit
+              </button>
+              <a href="{% url 'pages:delete_cashier' cashier.id %}" 
+                 class="btn-action btn-delete"
+                 onclick="return confirmDeleteCashier('{{ cashier.username }}');">
+                 Delete
+              </a>
+            </div>
+          </td>
+        </tr>
+
+        <!-- EDIT CASHIER MODAL -->
+        <div class="modal fade" id="editCashierModal{{ cashier.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form method="POST" action="{% url 'pages:edit_cashier' cashier.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                  <h5 class="modal-title">Edit Cashier: {{ cashier.username }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <input type="text" name="first_name" value="{{ cashier.first_name }}" placeholder="First Name">
+                  <input type="text" name="last_name" value="{{ cashier.last_name }}" placeholder="Last Name">
+                  <input type="email" name="email" value="{{ cashier.email }}" placeholder="Email" required>
+                  <input type="text" name="username" value="{{ cashier.username }}" placeholder="Username" required>
+                  <input type="password" name="password" placeholder="New Password (leave blank to keep current)">
+                  <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="is_active{{ cashier.id }}" {% if cashier.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active{{ cashier.id }}">Active</label>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn-primary">Update Cashier</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="empty-row">No cashiers found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+  
+<!-- ADD PRODUCT MODAL -->
+{% include 'modals/add_cashier_modal.html' %}
+
+<style>
+    .btn-activate {
+     
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    }
+    .btn-activate:hover {
+      background-color: var(--text-secondary);
+      color: var(--primary-bg);
+    }
+</style>
+<script>
+    
+  function confirmDeleteCashier(username) {
+    return confirm(`Are you sure you want to delete cashier "${username}"? This will permanently remove the user account.`);
+  }
+</script>
+{% endblock %}

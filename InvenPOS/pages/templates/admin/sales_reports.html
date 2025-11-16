@@ -1,0 +1,301 @@
+<!-- templates/admin/sales_reports.html -->
+{% extends 'navigation/navbar.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.sales-reports-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--primary-bg);
+    min-height: 100vh;
+    font-family: var(--font-body);
+}
+
+
+.stat-value {
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    color: var(--accent-green-dark);
+    margin: 0.5rem 0;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+  .filters-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .search-wrapper {
+    position: relative;
+  }
+
+  .search-wrapper i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+  }
+
+  .search-wrapper input {
+    padding-left: 2rem;
+  }
+
+  .filter-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--accent-green-light);
+    max-height: 40px;
+  }
+
+  .btn-filter {
+    background-color: var(--accent-green);
+    color: var(--primary-bg);
+    border: none;
+        padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--fs-sm);
+    transition: background-color 0.3s ease;
+    
+  }
+
+  .btn-filter:hover {
+    background-color: var(--accent-green-dark);
+    color: var(--primary-bg);
+  }
+
+  .controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filters-form {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-select,
+.btn-filter {
+  height: 38px;
+  border-radius: 8px;
+}
+
+/* 📱 Mobile-friendly adjustments */
+@media (max-width: 768px) {
+  .filters-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .filter-select,
+  .btn-filter {
+    width: 100%;
+    
+  }
+}
+
+/* Results */
+.results-section {
+    background: var(--sidebar-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.results-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.results-count {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+/* Table Styles */
+
+.invoice-number {
+    font-weight: var(--fw-bold);
+    color: var(--accent-green-dark);
+}
+
+.amount {
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+/* 📱 Mobile-friendly adjustments */
+@media (max-width: 768px) {
+    .search-wrapper {
+        min-width: 100%;
+    }
+}
+
+
+</style>
+
+<div class="products-container">
+    <!-- Header -->
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <h1 class="page-title">Sales Reports</h1>
+        <div class="reports-actions">
+            <a href="{% url 'pages:print_sales_report' %}?{{ request.GET.urlencode }}" class="btn-primary" target="_blank">
+                <i class="bi bi-printer"></i>
+                Print Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Sales</div>
+            <div class="stat-value">₱{{ total_sales|floatformat:2 }}</div>
+            <div class="stat-label">Filtered Results</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Transactions</div>
+            <div class="stat-value">{{ total_transactions }}</div>
+            <div class="stat-label">Invoices</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Average Sale</div>
+            <div class="stat-value">₱{{ average_sale|floatformat:2 }}</div>
+            <div class="stat-label">Per Transaction</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Date Range</div>
+            <div class="stat-value">
+                {% if date_from or date_to %}
+                    {{ date_from|default:"Start" }} to {{ date_to|default:"End" }}
+                {% else %}
+                    All Dates
+                {% endif %}
+            </div>
+            <div class="stat-label">Filter Period</div>
+        </div>
+    </div>
+
+    <!-- Updated Filters Section -->
+    <div class="controls-bar">
+        <form method="GET" class="filters-form">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="text" name="invoice_number" placeholder="Search by Invoice No. or Customer ID..." value="{{ invoice_number|default:'' }}">
+            </div>
+
+            <div class="filter-group">
+                <input type="date" class="filter-select" name="date_from" value="{{ date_from|default:'' }}">
+                <input type="date" class="filter-select" name="date_to" value="{{ date_to|default:'' }}">
+                
+                <select name="cashier" class="filter-select">
+                    <option value="">All Cashiers</option>
+                    {% for cashier_option in cashiers %}
+                        <option value="{{ cashier_option }}" {% if cashier_option == cashier %}selected{% endif %}>
+                            {{ cashier_option }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn btn-filter">
+                    Apply
+                </button>
+                
+                <a href="{% url 'pages:sales_reports' %}" class="btn-action btn-view">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div class="table-wrapper">
+       
+
+        {% if invoices %}
+        <table class="sales-table">
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Cashier</th>
+                    <th>Items</th>
+                    <th>Subtotal</th>
+                    <th>Tax</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td class="invoice-number">{{ invoice.invoice_number }}</td>
+                    <td>
+                        {% if invoice.date_issued %}
+                            {{ invoice.date_issued|date:"M d, Y" }}
+                        {% elif invoice.created_at %}
+                            {{ invoice.created_at|date:"M d, Y" }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ invoice.customer_id }}</td>
+                    <td>{{ invoice.staff_name }}</td>
+                    <td>{{ invoice.sold_items.count }}</td>
+                    <td class="amount">₱{{ invoice.subtotal|floatformat:2 }}</td>
+                    <td class="amount">₱{{ invoice.tax_amount|floatformat:2 }}</td>
+                    <td class="amount">₱{{ invoice.total_amount|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <i class="bi bi-graph-up" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;"></i>
+            <h3>No sales data found</h3>
+            <p>No sales records match your current filters.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}

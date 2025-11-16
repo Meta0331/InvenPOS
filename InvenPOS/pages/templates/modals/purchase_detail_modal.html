@@ -1,0 +1,108 @@
+<div class="modal fade" id="purchaseDetailModal{{ po.id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Purchase Order: #{{ po.id }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="products-container">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p><strong>Supplier:</strong> {{ po.supplier_name }}</p>
+              <p><strong>Date Ordered:</strong> {{ po.date_created|date:"M d, Y" }}</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Expected Delivery:</strong> {{ po.expected_date|date:"M d, Y" }}</p>
+              <p><strong>Status:</strong> 
+                {% if po.status == 'Pending' %}
+                  <span class="badge bg-warning">Pending</span>
+                {% elif po.status == 'Received' %}
+                  <span class="badge bg-success">Received</span>
+                {% elif po.status == 'Cancelled' %}
+                  <span class="badge bg-danger">Cancelled</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ po.status }}</span>
+                {% endif %}
+              </p>
+            </div>
+          </div>
+
+          <hr>
+
+          <h6 class="mb-3"><strong>Purchased Products</strong></h6>
+
+          <!-- Scrollable product list -->
+          <div class="product-list {% if items|length > 2 %}scrollable{% endif %}">
+            {% for item in items %}
+            <div class="product-item mb-3 p-3 rounded shadow-sm border">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">{{ item.product_name }}</h6>
+                  <p class="mb-0 text-muted">Quantity: {{ item.quantity }}</p>
+                </div>
+                <div class="text-end">
+                  <p class="mb-0"> ₱{{ item.cost_per_unit|floatformat:2 }} each</p>
+                  <p class="fw-bold mb-0">₱{{ item.total_cost|floatformat:2 }}</p>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">No items found for this purchase order.</p>
+            {% endfor %}
+          </div>
+
+          <hr>
+          <div class="totals text-start">
+            <p><strong>Total Items:</strong> {{ items.count }}</p>
+            <p><strong>Total Cost:</strong> ₱{{ po.total_cost|floatformat:2 }}</p>
+            {% if po.remarks %}
+            <p><strong>Remarks:</strong> {{ po.remarks }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Scrollbar styling */
+  .scrollable {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .scrollable::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollable::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .scrollable::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  .scrollable::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  .product-item {
+    transition: all 0.2s ease;
+  }
+
+  .product-item:hover {
+    background-color: #f8f9fa;
+  }
+</style>

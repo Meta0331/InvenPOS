@@ -1,0 +1,930 @@
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        /* FONTS */
+        --font-heading: 'Poppins', sans-serif;
+        --font-body: 'Roboto', sans-serif;
+
+        /* COLORS */
+        --primary-bg: #fafafa;
+        --secondary-bg: #e6efe3;
+        --sidebar-bg: #fefefe;
+        --header-bg: #fefefe;
+        --text-primary: #1f201f;
+        --text-secondary: #666b65;
+        --accent-green: #7cc37b;
+        --accent-green-light: #cfe8cb;
+        --accent-green-dark: #4b8e5f;
+        --border: #d2d8cf;
+        --alert-red: #e5534b;
+        --alert-red-light: #f7d6d3;
+        --alert-red-dark: #b7322c;
+
+        font-size: 16px;
+
+        /* Font sizes */
+        --fs-xs: 0.75rem;
+        --fs-sm: 0.875rem;
+        --fs-base: 1rem;
+        --fs-lg: 1.125rem;
+        --fs-xl: 1.25rem;
+        --fs-2xl: 1.5rem;
+        --fs-3xl: 1.875rem;
+        --fs-4xl: 2.25rem;
+
+        /* Line heights */
+        --lh-tight: 1.2;
+        --lh-normal: 1.5;
+        --lh-relaxed: 1.7;
+
+        /* Font weights */
+        --fw-regular: 400;
+        --fw-medium: 500;
+        --fw-semibold: 600;
+        --fw-bold: 700;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .payment-container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 1rem 3rem;
+        background: var(--primary-bg);
+        min-height: 100vh;
+        height: 100vh;
+        font-family: var(--font-body);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* Header */
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        flex-shrink: 0;
+    }
+
+    .payment-title {
+        font-size: var(--fs-2xl);
+        font-weight: var(--fw-semibold);
+        color: var(--accent-green-dark);
+        font-family: var(--font-heading);
+    }
+
+    .payment-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .btn-back {
+        font-size: var(--fs-sm);
+        font-weight: var(--medium);
+        letter-spacing: 0.5px;
+        font-family: var(--font-heading);
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        border: none;
+        background-color: var(--accent-green);
+        color: var(--primary-bg);
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-back:hover {
+        background: var(--text-primary);
+        transform: translateY(-1px);
+    }
+
+    .btn-logout {
+        background: var(--header-bg);
+        border: 1px solid var(--alert-red);
+        color: var(--alert-red);
+        font-size: var(--fs-sm);
+        letter-spacing: 0.5px;
+        font-family: var(--font-heading);
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+    }
+
+    .btn-logout:hover {
+        background: var(--alert-red-dark);
+        transform: translateY(-1px);
+    }
+
+    /* Main Layout */
+    .payment-main {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    /* Order Summary */
+    .order-summary {
+        padding: 2rem;
+        background: var(--sidebar-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--accent-green-light);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .summary-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+        flex-shrink: 0;
+    }
+
+    .summary-icon {
+        font-size: var(--fs-2xl);
+    }
+
+    .summary-title {
+        font-family: var(--font-heading);
+        font-size: var(--fs-xl);
+        font-weight: var(--fw-bold);
+        color: var(--text-primary);
+    }
+
+    .order-items {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    min-height: 0;
+    padding-right: 0.75rem; /* 👈 Adds space between text and scrollbar */
+    box-sizing: content-box; /* Ensures padding doesn't shrink content area */
+}
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--accent-green-light);
+    }
+
+    .item-name {
+        font-weight: var(--fw-medium);
+        color: var(--text-primary);
+    }
+
+    .item-quantity {
+        color: var(--text-secondary);
+        font-size: var(--fs-sm);
+    }
+
+    .item-price {
+        font-weight: var(--fw-semibold);
+        color: var(--accent-green-dark);
+    }
+
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 0;
+        border-top: 2px solid var(--border);
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
+    .total-label {
+        font-size: var(--fs-xl);
+        font-weight: var(--fw-bold);
+        color: var(--text-primary);
+    }
+
+    .total-amount {
+        font-size: var(--fs-2xl);
+        font-weight: var(--fw-bold);
+        color: var(--accent-green-dark);
+    }
+
+    /* Payment Form */
+    .payment-form {
+        padding: 2rem;
+        background: var(--sidebar-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--accent-green-light);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+        flex-shrink: 0;
+    }
+
+    .form-icon {
+        font-size: var(--fs-2xl);
+    }
+
+    .form-title {
+        font-family: var(--font-heading);
+        font-size: var(--fs-xl);
+        font-weight: var(--fw-bold);
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: var(--fw-medium);
+        color: var(--text-primary);
+    }
+
+    .form-input {
+        font-size: var(--fs-base);
+        transition: all 0.2s ease;
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--accent-green-light);
+        border-radius: 10px;
+        font-family: var(--font-body);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 3px var(--accent-green-light);
+    }
+
+    .customer-id {
+        background: var(--secondary-bg);
+        font-weight: var(--fw-bold);
+        color: var(--accent-green-dark);
+    }
+
+    .payment-details {
+        background: var(--primary-bg);
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 0 0 1rem;
+        border: 1px solid var(--accent-green-light);
+    }
+
+    .payment-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .payment-label {
+        color: var(--text-secondary);
+    }
+
+    .payment-value {
+        font-weight: var(--fw-semibold);
+        color: var(--text-primary);
+    }
+
+    .change-amount {
+        color: var(--accent-green-dark);
+        font-weight: var(--fw-bold);
+        font-size: var(--fs-lg);
+    }
+
+    .change-negative {
+        color: var(--alert-red);
+    }
+
+    .btn-complete {
+        width: 100%;
+        background: var(--accent-green);
+        color: var(--sidebar-bg);
+        border: none;
+        padding: 1.25rem 2rem;
+        border-radius: 12px;
+        font-family: var(--font-body);
+        font-size: var(--fs-lg);
+        font-weight: var(--fw-semibold);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
+    .btn-complete:hover {
+        background: var(--accent-green-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(124, 195, 123, 0.3);
+    }
+
+    .btn-complete:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Orders History */
+    .orders-history {
+        margin-top: 2rem;
+        background: var(--sidebar-bg);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border);
+        max-height: 400px;
+        overflow-y: auto;
+        flex-shrink: 0;
+    }
+
+    .history-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .history-icon {
+        font-size: var(--fs-2xl);
+    }
+
+    .history-title {
+        font-family: var(--font-heading);
+        font-size: var(--fs-2xl);
+        font-weight: var(--fw-bold);
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .orders-table th {
+        background: var(--secondary-bg);
+        padding: 1rem;
+        text-align: left;
+        font-weight: var(--fw-semibold);
+        color: var(--text-primary);
+        border-bottom: 2px solid var(--border);
+    }
+
+    .orders-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-secondary);
+    }
+
+    .orders-table tr:hover {
+        background: var(--primary-bg);
+    }
+
+    .order-id {
+        font-weight: var(--fw-bold);
+        color: var(--accent-green-dark);
+    }
+
+    .order-total {
+        font-weight: var(--fw-semibold);
+        color: var(--text-primary);
+    }
+
+    .order-change {
+        color: var(--accent-green);
+        font-weight: var(--fw-medium);
+    }
+
+    .no-orders {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .no-orders-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Custom scrollbar for order items */
+    .order-items::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .order-items::-webkit-scrollbar-track {
+        background: var(--secondary-bg);
+        border-radius: 3px;
+    }
+
+    .order-items::-webkit-scrollbar-thumb {
+        border-radius: 3px;
+    }
+
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .payment-main {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .payment-container {
+            padding: 1rem 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .payment-container {
+            padding: 1rem;
+            height: auto;
+            min-height: 100vh;
+        }
+
+        .payment-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .payment-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .order-summary,
+        .payment-form {
+            height: auto;
+            min-height: 300px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .order-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .payment-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .orders-table {
+            font-size: var(--fs-sm);
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .payment-main {
+            gap: 1rem;
+        }
+    }
+
+    /* Ensure no horizontal scroll */
+    body {
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="payment-container">
+    <!-- Header -->
+    <div class="payment-header">
+        <h1 class="payment-title">Payment Processing</h1>
+        <div class="payment-actions">
+            <a href="{% url 'pages:cashier_dashboard' %}" class="btn-back">
+                Back to POS
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="payment-main">
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <div class="summary-header">
+                <h2 class="summary-title">Order Summary</h2>
+            </div>
+
+            <div class="order-items" id="order-items">
+                <!-- Order items will be populated by JavaScript -->
+            </div>
+
+            <div class="order-total">
+                <span class="total-label">Total Amount:</span>
+                <span class="total-amount">₱<span id="order-total">0</span></span>
+            </div>
+        </div>
+
+        <!-- Payment Form -->
+        <div class="payment-form">
+            <div class="form-header">
+                <h2 class="form-title">Payment Details</h2>
+            </div>
+
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label class="form-label">Customer ID</label>
+                    <input type="text" class="form-input customer-id" id="customer-id" value="CUST-001" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Subtotal</label>
+                    <input type="text" class="form-input" id="subtotal-display" readonly>
+                </div>
+                 <!-- Tax Information Display -->
+                <div class="form-group">
+                    <div id="tax-info">
+                        <div
+                            style="background: var(--secondary-bg); padding: 0.75rem; border-radius: 8px; border-left: 4px solid var(--text-secondary);">
+                            <strong>Tax:</strong> Loading tax information...
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label class="form-label">Tax Amount</label>
+                    <input type="text" class="form-input" id="tax-amount-display" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Total Amount</label>
+                    <input type="text" class="form-input" id="total-amount-display" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cash Received (₱)</label>
+                    <input type="number" class="form-input" id="cash-received" placeholder="Enter amount received"
+                        min="0" step="0.01" required>
+                </div>
+
+                <div class="payment-details">
+                    <div class="payment-row">
+                        <span class="payment-label">Change:</span>
+                        <span class="payment-value change-amount" id="change-amount">₱0.00</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-complete" id="complete-btn" onclick="completePayment()" disabled>
+                    Complete Payment
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+<script>
+    // Initialize orders from localStorage or create empty array
+    let orders = JSON.parse(localStorage.getItem('posOrders')) || [];
+    let customerCounter = parseInt(localStorage.getItem('customerCounter')) || 1;
+    let defaultTaxRate = null;
+
+    // Load cart data from sessionStorage
+    const cart = JSON.parse(sessionStorage.getItem('paymentCart')) || [];
+
+    // Load default tax rate from server
+    async function loadDefaultTaxRate() {
+        try {
+            const response = await fetch('/api/default-tax-rate/');
+            const data = await response.json();
+
+            if (data.success && data.tax_rate) {
+                defaultTaxRate = data.tax_rate;
+                updateTaxDisplay();
+            } else {
+                defaultTaxRate = null;
+                updateTaxDisplay();
+            }
+        } catch (error) {
+            console.error('Error loading tax rate:', error);
+            defaultTaxRate = null;
+            updateTaxDisplay();
+        }
+    }
+
+    function updateTaxDisplay() {
+        const taxInfoElement = document.getElementById('tax-info');
+        if (taxInfoElement) {
+            if (defaultTaxRate) {
+                taxInfoElement.innerHTML = `
+                <div style="background: var(--accent-green-light); padding: 0.75rem; border-radius: 8px; border-left: 4px solid var(--accent-green);">
+                    <strong>Applied Tax:</strong> ${defaultTaxRate.display_name}
+                </div>
+            `;
+            } else {
+                taxInfoElement.innerHTML = `
+                <div style="background: var(--secondary-bg); padding: 0.75rem; border-radius: 8px; border-left: 4px solid var(--text-secondary);">
+                    <strong>Tax:</strong> No tax applied
+                </div>
+            `;
+            }
+        }
+    }
+
+    function calculateOrder() {
+        const orderItems = document.getElementById('order-items');
+        const orderTotal = document.getElementById('order-total');
+        const subtotalDisplay = document.getElementById('subtotal-display');
+        const taxAmountDisplay = document.getElementById('tax-amount-display');
+        const totalAmountDisplay = document.getElementById('total-amount-display');
+
+        let subtotal = 0;
+        orderItems.innerHTML = '';
+
+        if (cart.length === 0) {
+            orderItems.innerHTML = '<p class="no-orders">No items in cart</p>';
+            orderTotal.textContent = '0';
+            if (subtotalDisplay) subtotalDisplay.value = '₱0';
+            if (taxAmountDisplay) taxAmountDisplay.value = '₱0';
+            if (totalAmountDisplay) totalAmountDisplay.value = '₱0';
+            return;
+        }
+
+        cart.forEach(item => {
+            const itemTotal = item.qty * item.price;
+            subtotal += itemTotal;
+
+            const orderItem = document.createElement('div');
+            orderItem.className = 'order-item';
+            orderItem.innerHTML = `
+            <div>
+                <div class="item-name">${item.name}</div>
+                <div class="item-quantity">Qty: ${item.qty} × ₱${item.price}</div>
+            </div>
+            <div class="item-price">₱${itemTotal.toFixed(2)}</div>
+        `;
+            orderItems.appendChild(orderItem);
+        });
+
+        // Calculate tax and total automatically based on default tax rate
+        const taxAmount = defaultTaxRate ? subtotal * (defaultTaxRate.percentage / 100) : 0;
+        const totalAmount = subtotal + taxAmount;
+
+        orderTotal.textContent = totalAmount.toFixed(2);
+        if (subtotalDisplay) subtotalDisplay.value = `₱${subtotal.toFixed(2)}`;
+        if (taxAmountDisplay) taxAmountDisplay.value = `₱${taxAmount.toFixed(2)}`;
+        if (totalAmountDisplay) totalAmountDisplay.value = `₱${totalAmount.toFixed(2)}`;
+
+        // Update customer ID
+        document.getElementById('customer-id').value = `CUST-${customerCounter.toString().padStart(3, '0')}`;
+
+        // Calculate initial change
+        calculateChange();
+    }
+
+    function calculateChange() {
+        const cashInput = document.getElementById('cash-received');
+        const cashReceived = parseFloat(cashInput.value) || 0;
+        const totalAmount = parseFloat(document.getElementById('order-total').textContent) || 0;
+        const changeAmount = document.getElementById('change-amount');
+        const completeBtn = document.getElementById('complete-btn');
+
+        const change = cashReceived - totalAmount;
+
+        if (cashReceived === 0) {
+            changeAmount.textContent = '₱0.00';
+            changeAmount.className = 'payment-value change-amount';
+            completeBtn.disabled = true;
+        } else if (change >= 0) {
+            changeAmount.textContent = `₱${change.toFixed(2)}`;
+            changeAmount.className = 'payment-value change-amount';
+            completeBtn.disabled = false;
+        } else {
+            changeAmount.textContent = `Insufficient: -₱${Math.abs(change).toFixed(2)}`;
+            changeAmount.className = 'payment-value change-amount change-negative';
+            completeBtn.disabled = true;
+        }
+    }
+
+    async function completePayment() {
+    const cashReceived = parseFloat(document.getElementById('cash-received').value);
+    const totalAmount = parseFloat(document.getElementById('order-total').textContent);
+    const subtotal = cart.reduce((sum, item) => sum + (item.qty * item.price), 0);
+    const change = cashReceived - totalAmount;
+    const customerId = document.getElementById('customer-id').value;
+
+    // Validate payment
+    if (change < 0) {
+        alert('Insufficient cash received!');
+        return;
+    }
+
+    // Validate stock availability
+    const stockCheck = await checkStockAvailability();
+    if (!stockCheck.available) {
+        alert(`Insufficient stock for ${stockCheck.productName}. Available: ${stockCheck.availableQuantity}`);
+        return;
+    }
+
+    try {
+        // Prepare data for the server - REMOVE staff_name, backend will handle it
+        const invoiceData = {
+            customer_id: customerId,
+            subtotal: subtotal,
+            cash_received: cashReceived,
+            change: change,
+            // staff_name removed - backend will use logged-in user
+            sold_items: cart.map(item => ({
+                product_id: item.id,
+                product_name: item.name,
+                quantity: item.qty,
+                unit_price: item.price,
+                total_price: item.qty * item.price
+            }))
+        };
+
+        // Send data to server
+        const response = await fetch('/api/create-invoice/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify(invoiceData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Create local order record - use the actual staff name from response
+            const newOrder = {
+                orderId: result.invoice_number,
+                customerId: customerId,
+                items: [...cart],
+                subtotal: subtotal,
+                taxAmount: result.tax_amount,
+                totalAmount: totalAmount,
+                cashReceived: cashReceived,
+                change: change,
+                taxRate: result.tax_rate_name,
+                staffName: result.staff_name, // Use actual cashier name from response
+                date: new Date().toLocaleString(),
+                invoiceId: result.invoice_id
+            };
+
+            // Add to orders
+            orders.unshift(newOrder);
+            localStorage.setItem('posOrders', JSON.stringify(orders));
+
+            // Increment customer counter
+            customerCounter++;
+            localStorage.setItem('customerCounter', customerCounter.toString());
+
+            // Clear cart
+            sessionStorage.removeItem('paymentCart');
+            sessionStorage.removeItem('posCart');
+
+            // Show success message with print option
+            const taxInfo = defaultTaxRate ? `\nTax (${result.tax_rate_percentage}%): ₱${result.tax_amount.toFixed(2)}` : '';
+            const userChoice = confirm(`Payment completed successfully!\n\nInvoice: ${result.invoice_number}\nCustomer: ${result.customer_id}\nSubtotal: ₱${subtotal.toFixed(2)}${taxInfo}\nTotal: ₱${totalAmount.toFixed(2)}\nCash: ₱${cashReceived.toFixed(2)}\nChange: ₱${change.toFixed(2)}\nCashier: ${result.staff_name}\n\nWould you like to print the invoice?`);
+
+            if (userChoice) {
+                // Open print PDF in new tab
+                window.open(`/invoice/${result.invoice_id}/print/`, '_blank');
+            }
+
+            // Redirect back to POS
+            window.location.href = "{% url 'pages:cashier_dashboard' %}";
+        } else {
+            throw new Error(result.error || 'Failed to save invoice');
+        }
+    } catch (error) {
+        console.error('Error completing payment:', error);
+        alert('Error processing payment: ' + error.message);
+    }
+}
+
+    // Add print button to orders history (optional)
+    function addPrintButtonToHistory() {
+        const ordersTable = document.getElementById('orders-tbody');
+        if (ordersTable) {
+            // This would require storing invoice IDs in your local storage
+            // You might want to implement this based on your specific needs
+        }
+    }
+
+    // Helper function to check stock availability
+    async function checkStockAvailability() {
+        for (const item of cart) {
+            try {
+                const response = await fetch(`/api/product/${item.id}/`);
+                const product = await response.json();
+
+                if (product.product_quantity < item.qty) {
+                    return {
+                        available: false,
+                        productName: product.product_name,
+                        availableQuantity: product.product_quantity
+                    };
+                }
+            } catch (error) {
+                console.error('Error checking stock:', error);
+            }
+        }
+        return { available: true };
+    }
+
+    // Helper function to get CSRF token
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function () {
+        // If no items in cart, redirect back to POS
+        if (cart.length === 0) {
+            alert('No items in cart. Redirecting to POS...');
+            const backBtn = document.querySelector('.btn-back');
+            if (backBtn) {
+                window.location.href = backBtn.href;
+            }
+            return;
+        }
+
+        // Load default tax rate and then calculate order
+        loadDefaultTaxRate().then(() => {
+            calculateOrder();
+        });
+
+        // Add event listeners
+        const cashInput = document.getElementById('cash-received');
+
+        if (cashInput) {
+            cashInput.addEventListener('input', calculateChange);
+            cashInput.addEventListener('paste', () => setTimeout(calculateChange, 10));
+            cashInput.addEventListener('keyup', calculateChange);
+            cashInput.focus();
+        }
+
+        // Add keyboard shortcut for completing payment (Enter key)
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !document.getElementById('complete-btn').disabled) {
+                completePayment();
+            }
+        });
+    });
+
+    function printCurrentOrder() {
+        // This would generate a PDF for the current order before payment
+        // You might want to implement this as a preview feature
+        alert('Print preview feature would generate a PDF of the current order.');
+    }
+
+    // Add Bootstrap Icons
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+    document.head.appendChild(link);
+</script>
+
+{% endblock %}

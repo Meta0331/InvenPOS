@@ -1,0 +1,26 @@
+<!-- ADD CASHIER MODAL -->
+<div class="modal fade" id="addCashierModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'pages:add_cashier' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Add Cashier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" name="username" placeholder="Username" required>
+          <input type="email" name="email" placeholder="Email" required>
+          <input type="text" name="first_name" placeholder="First Name">
+          <input type="text" name="last_name" placeholder="Last Name">
+          <input type="password" name="password" placeholder="Password" required>
+          <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+       
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-primary">Create Cashier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

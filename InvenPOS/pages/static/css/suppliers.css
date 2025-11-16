@@ -1,0 +1,296 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap');
+
+:root {
+     --primary-bg: #fafafa;
+      --secondary-bg: #e6efe3;
+      --sidebar-bg: #fefefe;
+      --header-bg: #fefefe;
+      --text-primary: #1f201f;
+      --text-secondary: #666b65;
+      --accent-green: #7cc37b;
+      --accent-green-light: #cfe8cb;
+      --accent-green-dark: #4b8e5f;
+      --border: #d2d8cf;
+      --alert-red: #e5534b;        /* Main alert red */
+        --alert-red-light: #f7d6d3;  /* Background for subtle alert boxes */
+        --alert-red-dark: #b7322c;   /* Hover, border, or emphasis */
+
+
+
+    font-size: 16px;
+    /* 1rem = 16px */
+
+    /* Font families */
+    --font-sans: 'Inter', 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+    --font-serif: 'Merriweather', serif;
+
+    /* Font sizes (modern scale) */
+    --fs-xs: 0.75rem;
+    /* 12px */
+    --fs-sm: 0.875rem;
+    /* 14px */
+    --fs-base: 1rem;
+    /* 16px */
+    --fs-lg: 1.125rem;
+    /* 18px */
+    --fs-xl: 1.25rem;
+    /* 20px */
+    --fs-2xl: 1.5rem;
+    /* 24px */
+    --fs-3xl: 1.875rem;
+    /* 30px */
+    --fs-4xl: 2.25rem;
+    /* 36px */
+    --fs-5xl: 3rem;
+    /* 48px */
+    --fs-6xl: 4rem;
+    /* 64px */
+
+    /* Responsive fluid typography (using clamp) */
+    --fs-fluid-sm: clamp(0.875rem, 0.8vw, 1rem);
+    --fs-fluid-md: clamp(1rem, 1vw, 1.25rem);
+    --fs-fluid-lg: clamp(1.5rem, 2vw, 2.25rem);
+    --fs-fluid-xl: clamp(2rem, 3vw, 3rem);
+    --fs-fluid-xxl: clamp(3rem, 5vw, 5rem);
+
+    /* Line heights */
+    --lh-tight: 1.2;
+    --lh-normal: 1.5;
+    --lh-relaxed: 1.7;
+
+    /* Font weights */
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+}
+
+/* STAT CARDS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--header-bg);
+  border: 1px solid var(--accent-green-light);
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.stat-card h3 {
+  color: var(--accent-green-dark);
+  font-size: var(--fs-5xl);
+  margin-bottom: 0.25rem;
+}
+
+.stat-card p {
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+
+/* TABLE */
+.table-wrapper {
+   overflow-x: auto;
+  overflow-y: auto; /* Enable vertical scroll */
+  background: var(--header-bg);
+  border-radius: 10px;
+  border: 1px solid var(--accent-green-light);
+  max-height: 700px; /* Adjust height limit */
+  max-width: 100%; /* Prevent overflowing parent container */
+}
+
+/* 🪄 Smooth scrollbar styling */
+.table-wrapper::-webkit-scrollbar {
+  width: 10px;         /* Scrollbar thickness */
+  height: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+  border-left: solid 1px var(--accent-green-light);
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--accent-green);
+  border-radius: 10px;
+  border: 2px solid var(--secondary-bg); /* Creates spacing effect */
+  transition: background 0.3s ease;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-green-dark);
+}
+
+.table-wrapper::-webkit-scrollbar-corner {
+  background: var(--secondary-bg);
+}
+
+.supplier-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+}
+
+.supplier-table th, .supplier-table td {
+  padding: 1rem;    
+  text-align: left;
+  border-bottom: 1px solid var(--accent-green-light);
+}
+.sales-table thead th {
+  position: sticky;
+  top: 0;
+   background: var(--accent-green);
+  color: var(--primary-bg);
+  font-weight: var(--fw-semibold);
+  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.supplier-table th {
+  background: var(--accent-green);
+  color: var(--primary-bg);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+}
+
+.supplier-table tr:hover {
+  background: var(--accent-green-light);
+  transition: transform 0.3s;
+}
+
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+
+}
+
+.sales-table th, .sales-table td {
+  padding: 1rem;    
+  text-align: left;
+  border-bottom: 1px solid var(--accent-green-light);
+}
+
+.sales-table th {
+  background: var(--accent-green);
+  color: var(--primary-bg);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.05rem;
+}
+
+.sales-table tr:hover {
+  background: var(--accent-green-light);
+  transition: transform 0.3s;
+}
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem; /* space between buttons */
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Buttons styling (keep consistent size) */
+.btn-action {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: var(--fs-sm);
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  white-space: nowrap;
+}
+
+.btn-edit {
+  background: var(--accent-green);
+  color: var(--header-bg);
+}
+
+.btn-view {
+  background: var(--text-secondary);
+  color: var(--header-bg);
+}
+.btn-view:hover {
+  background: var(--text-primary);
+}
+
+.btn-edit:hover {
+  background: var(--accent-green-dark);
+}
+
+.btn-delete {
+  background: transparent;
+  border: 1px solid var(--alert-red);
+  color: var(--alert-red);
+  
+}
+
+.empty-row {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem 0;
+}
+
+/* MODAL STYLES */
+.modal-content {
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.modal-body input {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--accent-green-light);
+  border-radius: 10px;
+  font-family: var(--font-body);
+}
+
+.btn-primary {
+  background: var(--accent-green);
+  color: var(--primary-bg);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--accent-green-dark);
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .btn-add-product {
+    width: 100%;
+  }
+
+  .supplier-table th, .supplier-table td {
+    font-size: var(--fs-sm);
+    padding: 0.75rem;
+  }
+
+  .sales-table th, .sales-table td {
+    font-size: var(--fs-sm);
+    padding: 0.75rem;
+  }
+}

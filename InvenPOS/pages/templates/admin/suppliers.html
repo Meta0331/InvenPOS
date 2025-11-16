@@ -1,0 +1,169 @@
+{% extends 'navigation/navbar.html' %}
+
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+
+<div class="products-container">
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1 class="page-title">Supplier Management</h1>
+    <button class="btn-add-product" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
+      + Add Supplier
+    </button>
+  </div>
+
+  <!-- TOP STAT CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>{{ total_suppliers }}</h3>
+      <p>Total Suppliers</p>
+    </div>
+    <div class="stat-card">
+      <h3>{{ active_suppliers }}</h3>
+      <p>Active Suppliers</p>
+    </div>
+  </div>
+
+  <!-- SUPPLIER TABLE -->
+  <div class="table-wrapper">
+    <table class="supplier-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Email</th>
+          <th>Company</th>
+          <th>Date Added</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for supplier in suppliers %}
+        <tr>
+          <td>{{ supplier.name }}</td>
+          <td>{{ supplier.contact }}</td>
+          <td>{{ supplier.email }}</td>
+          <td>{{ supplier.company }}</td>
+          <td>{{ supplier.date_added|date:"M d, Y" }}</td>
+          <td>
+            {% if supplier.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-danger">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="action-buttons">
+              
+              {% if supplier.is_active %}
+                  <a href="{% url 'pages:deactivate_supplier' supplier.id %}" 
+                   class="btn-action btn-view"
+                   onclick="return confirm('Deactivate supplier {{ supplier.name }}?');">
+                   Deactivate
+                </a>
+               
+                {% else %}
+              
+               <a href="{% url 'pages:activate_supplier' supplier.id %}" 
+                   class="btn-action btn-activate"
+                   onclick="return confirm('Activate supplier {{ supplier.name }}?');">
+                   Activate
+                </a>
+              {% endif %}
+              <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editSupplierModal{{ supplier.id }}">
+                Edit
+              </button>
+
+              <a href="{% url 'pages:delete_supplier' supplier.id %}" 
+                 class="btn-action btn-delete"
+                 onclick="return confirmDelete('{{ supplier.name }}');">
+                 Delete
+              </a>
+            </div>
+          </td>
+        </tr>
+
+        <!-- EDIT SUPPLIER MODAL -->
+        <div class="modal fade" id="editSupplierModal{{ supplier.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form method="POST" action="{% url 'pages:edit_supplier' supplier.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                  <h5 class="modal-title">Edit Supplier</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <input type="text" name="name" value="{{ supplier.name }}" placeholder="Name" required>
+                  <input type="text" name="contact" value="{{ supplier.contact }}" placeholder="Contact">
+                  <input type="email" name="email" value="{{ supplier.email }}" placeholder="Email">
+                  <input type="text" name="address" value="{{ supplier.address }}" placeholder="Address">
+                  <input type="text" name="company" value="{{ supplier.company }}" placeholder="Company">
+                 
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn-primary">Update</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="empty-row">No suppliers found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD SUPPLIER MODAL -->
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'pages:add_supplier' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Add Supplier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" name="name" placeholder="Name" required>
+          <input type="text" name="contact" placeholder="Contact">
+          <input type="email" name="email" placeholder="Email">
+          <input type="text" name="address" placeholder="Address">
+          <input type="text" name="company" placeholder="Company">
+        
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRMATION SCRIPT -->
+<script>
+  function confirmDelete(name) {
+    return confirm(`Are you sure you want to delete supplier "${name}"? This action cannot be undone.`);
+  }
+</script>
+
+<style>
+  .btn-activate {
+     
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    }
+    .btn-activate:hover {
+      background-color: var(--text-secondary);
+      color: var(--primary-bg);
+    }
+</style>
+
+{% endblock %}

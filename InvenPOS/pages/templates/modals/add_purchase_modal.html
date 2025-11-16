@@ -1,0 +1,91 @@
+ <!-- Create Purchase Order Modal -->
+  {% if user.is_staff %}
+  <div class="modal fade" id="createPurchaseModal" tabindex="-1" aria-labelledby="createPurchaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Create New Purchase Order</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="purchaseOrderForm" method="POST">
+            {% csrf_token %}
+            
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label class="form-label"><strong>Supplier Name</strong></label>
+                <select name="supplier" class="form-control" required id="supplierSelect">
+                  <option value="">-- Select Supplier --</option>
+                  {% for supplier in suppliers %}
+                    <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><strong>Expected Delivery Date</strong></label>
+                <input type="date" name="expected_date" class="form-control" required id="expectedDate">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><strong>Remarks</strong></label>
+              <input type="text" name="remarks" class="form-control" placeholder="Optional notes..." id="remarks">
+            </div>
+
+            <hr>
+
+            <!-- Products Header with Add Button -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0"><strong>Purchase Products</strong></h6>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="addRow()">
+                <i class="bi bi-plus"></i> Add Product
+              </button>
+            </div>
+
+            <!-- Scrollable Products Table -->
+            <div class="table-responsive scrollable-table">
+              <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Cost per Unit</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="productTable">
+                  <tr class="product-row">
+                    <td>
+                      <select name="product[]" class="form-control product-select" required>
+                        <option value="">-- Select Product --</option>
+                        {% for product in products %}
+                          <option value="{{ product.id }}">{{ product.product_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                    <td><input type="number" name="quantity[]" class="form-control quantity" min="1" required></td>
+                    <td><input type="number" name="cost[]" class="form-control cost" step="0.01" min="0" required></td>
+                    <td><button type="button" class="btn btn-sm btn-delete remove-row" disabled>Remove</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn-primary" id="submitBtn">
+                <span id="submitText">Save Purchase Order</span>
+                <div id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </button>
+              <div id="formMessage" class="alert d-none mb-0"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}

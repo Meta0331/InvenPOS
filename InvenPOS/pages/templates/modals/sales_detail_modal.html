@@ -1,0 +1,83 @@
+<div class="modal fade" id="saleDetailModal{{ invoice.id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Invoice: {{ invoice.invoice_number }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="products-container">
+          <p><strong>Customer ID:</strong> {{ invoice.customer_id }}</p>
+          <p><strong>Date:</strong> {{ invoice.date_issued|date:"M d, Y h:i A" }}</p>
+
+          <hr>
+
+          <h6 class="mb-3"><strong>Ordered Products</strong></h6>
+
+          {# If there are 2 or more products, make it scrollable #}
+          <div class="product-list {% if sold_items|length > 1 %}scrollable{% endif %}">
+            {% for item in sold_items %}
+            <div class="product-item mb-3 p-3 rounded shadow-sm border">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">{{ item.product_name }}</h6>
+                  <p class="mb-0 text-muted">Qty: {{ item.quantity }}</p>
+                </div>
+                <div class="text-end">
+                  <p class="mb-0">₱{{ item.unit_price }} each</p>
+                  <p class="fw-bold mb-0">₱{{ item.total_price }}</p>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">No items found for this invoice.</p>
+            {% endfor %}
+          </div>
+
+          <hr>
+          <div class="totals text-start">
+            <p><strong>Subtotal:</strong> ₱{{ invoice.subtotal }}</p>
+            <p><strong>Tax:</strong> ₱{{ invoice.tax_amount }}</p>
+            <p><strong>Total:</strong> ₱{{ invoice.total_amount }}</p>
+            <p><strong>Cash Received:</strong> ₱{{ invoice.cash_received }}</p>
+            <p><strong>Change:</strong> ₱{{ invoice.change }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a href="{% url 'pages:print_invoice_pdf' invoice.id %}" target="_blank" class="btn btn-primary">Print</a>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Scrollbar styling */
+  .scrollable {
+    max-height: 100px;
+    overflow-y: auto;
+  }
+
+  .scrollable::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollable::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .scrollable::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  .scrollable::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+</style>

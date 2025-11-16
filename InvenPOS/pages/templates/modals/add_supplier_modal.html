@@ -1,0 +1,22 @@
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{% url 'pages:add_supplier' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Add Supplier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" name="name" class="form-control mb-2" placeholder="Supplier Name" required>
+          <input type="text" name="contact" class="form-control mb-2" placeholder="Contact Number" required>
+          <input type="email" name="email" class="form-control mb-2" placeholder="Email Address" required>
+          <textarea name="address" class="form-control mb-2" placeholder="Address" rows="2" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

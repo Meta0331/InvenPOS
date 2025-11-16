@@ -1,0 +1,301 @@
+<!-- Manage Category Modal -->
+<div class="modal fade" id="manageCategoryModal" tabindex="-1" aria-labelledby="manageCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Manage Categories</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="categoryManagementForm" method="POST">
+          {% csrf_token %}
+          
+          <!-- Add New Category Section -->
+          <div class="row mb-4">
+            <div class="col-md-8">
+              <label class="form-label"><strong>Add New Category</strong></label>
+              <div class="d-flex gap-2">
+                <input type="text" name="new_category_name" class="form-control" placeholder="Enter category name..." id="newCategoryInput">
+                <button type="button" class="btn btn-primary" onclick="addNewCategory()" style="height: 50px; padding: 0.375rem 1rem;">
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories Header -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0"><strong>Existing Categories</strong></h6>
+            <span class="badge bg-secondary" id="categoryCount">{{ categories.count }} categories</span>
+          </div>
+
+          <!-- Scrollable Categories Table -->
+          <div class="table-responsive scrollable-table">
+            <table class="table table-bordered align-middle text-center">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 60px;">#</th>
+                  <th>Category Name</th>
+                  <th style="width: 120px;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="categoryTable">
+                {% for cat in categories %}
+                <tr class="category-row" data-category-id="{{ cat.id }}">
+                  <td>
+                    <strong>{{ forloop.counter }}</strong>
+                  </td>
+                  <td>
+                    <input type="text" name="category_name_{{ cat.id }}" value="{{ cat.name }}" class="form-control category-input" data-original-value="{{ cat.name }}">
+                  </td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-category" onclick="markForDeletion('{{ cat.id }}')">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox me-2"></i>No categories available
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Hidden field for categories to delete -->
+          <input type="hidden" name="categories_to_delete" id="categoriesToDelete" value="">
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="saveAllBtn">
+              <span id="saveText">Save All Changes</span>
+              <div id="saveSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
+            <div id="formMessage" class="alert d-none mb-0"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let categoriesToDelete = new Set();
+let newCategories = [];
+
+function addNewCategory() {
+  const newCategoryInput = document.getElementById('newCategoryInput');
+  const categoryName = newCategoryInput.value.trim();
+  
+  if (!categoryName) {
+    showMessage('Please enter a category name', 'danger');
+    return;
+  }
+
+  // Add to new categories array
+  newCategories.push(categoryName);
+  
+  // Add to table
+  const tableBody = document.getElementById('categoryTable');
+  const rowCount = tableBody.querySelectorAll('tr.category-row').length + 1;
+  
+  const newRow = document.createElement('tr');
+  newRow.className = 'category-row new-category';
+  newRow.innerHTML = `
+    <td><strong>${rowCount}</strong></td>
+    <td>
+      <input type="text" value="${categoryName}" class="form-control category-input" readonly>
+    </td>
+    <td>
+      <button type="button" class="btn btn-sm btn-outline-warning" onclick="removeNewCategory(this)">
+        Cancel
+      </button>
+    </td>
+  `;
+  
+  tableBody.appendChild(newRow);
+  
+  // Clear input and update count
+  newCategoryInput.value = '';
+  updateCategoryCount();
+  showMessage('Category added - click "Save All Changes" to confirm', 'success');
+}
+
+function removeNewCategory(button) {
+  const row = button.closest('tr');
+  const categoryName = row.querySelector('.category-input').value;
+  
+  // Remove from new categories array
+  newCategories = newCategories.filter(name => name !== categoryName);
+  row.remove();
+  updateCategoryCount();
+  renumberRows();
+}
+
+function markForDeletion(categoryId) {
+  const row = document.querySelector(`tr[data-category-id="${categoryId}"]`);
+  
+  if (categoriesToDelete.has(categoryId)) {
+    // Undo deletion
+    categoriesToDelete.delete(categoryId);
+    row.style.backgroundColor = '';
+    row.querySelector('.remove-category').textContent = 'Delete';
+    row.querySelector('.remove-category').className = 'btn btn-sm btn-outline-danger remove-category';
+  } else {
+    // Mark for deletion
+    categoriesToDelete.add(categoryId);
+    row.style.backgroundColor = '#ffe6e6';
+    row.querySelector('.remove-category').textContent = 'Undo';
+    row.querySelector('.remove-category').className = 'btn btn-sm btn-outline-warning remove-category';
+  }
+  
+  updateDeleteField();
+}
+
+function updateDeleteField() {
+  document.getElementById('categoriesToDelete').value = Array.from(categoriesToDelete).join(',');
+}
+
+function updateCategoryCount() {
+  const totalCategories = document.querySelectorAll('tr.category-row').length;
+  document.getElementById('categoryCount').textContent = `${totalCategories} categories`;
+}
+
+function renumberRows() {
+  const rows = document.querySelectorAll('tr.category-row');
+  rows.forEach((row, index) => {
+    row.querySelector('td strong').textContent = index + 1;
+  });
+}
+
+function showMessage(message, type) {
+  const messageDiv = document.getElementById('formMessage');
+  messageDiv.textContent = message;
+  messageDiv.className = `alert alert-${type} mb-0`;
+  messageDiv.classList.remove('d-none');
+  
+  setTimeout(() => {
+    messageDiv.classList.add('d-none');
+  }, 3000);
+}
+
+// Form submission
+document.getElementById('categoryManagementForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const saveBtn = document.getElementById('saveAllBtn');
+  const saveText = document.getElementById('saveText');
+  const spinner = document.getElementById('saveSpinner');
+  
+  // Show loading state
+  saveBtn.disabled = true;
+  saveText.textContent = 'Saving...';
+  spinner.classList.remove('d-none');
+  
+  // Prepare form data
+  const formData = new FormData(this);
+  
+  // Add new categories
+  newCategories.forEach((category, index) => {
+    formData.append('new_categories', category);
+  });
+  
+  // Send AJAX request
+  fetch('{% url "pages:manage_categories_bulk" %}', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showMessage('All changes saved successfully!', 'success');
+      setTimeout(() => {
+        location.reload(); // Reload to reflect changes
+      }, 1000);
+    } else {
+      showMessage(data.error || 'Error saving changes', 'danger');
+    }
+  })
+  .catch(error => {
+    showMessage('Network error occurred', 'danger');
+    console.error('Error:', error);
+  })
+  .finally(() => {
+    // Reset loading state
+    saveBtn.disabled = false;
+    saveText.textContent = 'Save All Changes';
+    spinner.classList.add('d-none');
+  });
+});
+</script>
+
+<style>
+.scrollable-table {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.category-row {
+  transition: background-color 0.2s ease;
+}
+
+.category-row:hover {
+  background-color: #f8f9fa;
+}
+
+.new-category {
+  background-color: #e8f5e8 !important;
+}
+
+.category-input:read-only {
+  background-color: #f8f9fa;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.btn-outline-danger {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-outline-warning {
+  color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-outline-warning:hover {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.alert {
+  margin-bottom: 0;
+  margin-left: 15px;
+}
+
+.d-flex.gap-2 .btn {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 1rem;
+}
+</style>

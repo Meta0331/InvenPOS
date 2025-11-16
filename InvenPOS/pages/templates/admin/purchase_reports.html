@@ -1,0 +1,284 @@
+<!-- templates/admin/purchase_reports.html -->
+{% extends 'navigation/navbar.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.purchase-reports-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--primary-bg);
+    min-height: 100vh;
+    font-family: var(--font-body);
+}
+
+.stat-value {
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    color: var(--accent-green-dark);
+    margin: 0.5rem 0;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+.filters-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-wrapper {
+    position: relative;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.search-wrapper input {
+    padding-left: 2rem;
+}
+
+.filter-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--accent-green-light);
+    max-height: 40px;
+}
+
+.btn-filter {
+    background-color: var(--accent-green);
+    color: var(--primary-bg);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--fs-sm);
+    transition: background-color 0.3s ease;
+}
+
+.btn-filter:hover {
+    background-color: var(--accent-green-dark);
+    color: var(--primary-bg);
+}
+
+.controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filters-form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-select,
+.btn-filter {
+    height: 38px;
+    border-radius: 8px;
+}
+
+/* Results */
+.results-section {
+    background: var(--sidebar-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.results-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.results-count {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+/* Table Styles */
+.invoice-number {
+    font-weight: var(--fw-bold);
+    color: var(--accent-green-dark);
+}
+
+.amount {
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+/* 📱 Mobile-friendly adjustments */
+@media (max-width: 768px) {
+    .search-wrapper {
+        min-width: 100%;
+    }
+    
+    .filters-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: stretch;
+        width: 100%;
+    }
+
+    .filter-select,
+    .btn-filter {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="products-container">
+    <!-- Header -->
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <h1 class="page-title">Purchase Reports</h1>
+        <div class="reports-actions">
+            <a href="{% url 'pages:print_purchase_report' %}?{{ request.GET.urlencode }}" class="btn-primary" target="_blank">
+                <i class="bi bi-printer"></i>
+                Print Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Purchases</div>
+            <div class="stat-value">₱{{ total_purchases|floatformat:2 }}</div>
+            <div class="stat-label">Received Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Purchase Orders</div>
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-label">Completed Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Average Purchase</div>
+            <div class="stat-value">₱{{ average_purchase|floatformat:2 }}</div>
+            <div class="stat-label">Per Order</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Date Range</div>
+            <div class="stat-value">
+                {% if date_from or date_to %}
+                    {{ date_from|default:"Start" }} to {{ date_to|default:"End" }}
+                {% else %}
+                    All Dates
+                {% endif %}
+            </div>
+            <div class="stat-label">Filter Period</div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="controls-bar">
+        <form method="GET" class="filters-form">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="text" name="search" placeholder="Search by Purchase ID or Supplier..." value="{{ search|default:'' }}">
+            </div>
+
+            <div class="filter-group">
+                <input type="date" class="filter-select" name="date_from" value="{{ date_from|default:'' }}">
+                <input type="date" class="filter-select" name="date_to" value="{{ date_to|default:'' }}">
+                
+                <select name="supplier" class="filter-select">
+                    <option value="">All Suppliers</option>
+                    {% for supplier_option in suppliers %}
+                        <option value="{{ supplier_option }}" {% if supplier_option == supplier %}selected{% endif %}>
+                            {{ supplier_option }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn btn-filter">
+                    Apply
+                </button>
+                
+                <a href="{% url 'pages:purchase_reports' %}" class="btn-action btn-view">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div class="table-wrapper">
+        {% if purchase_orders %}
+        <table class="sales-table">
+            <thead>
+                <tr>
+                    <th>Purchase ID</th>
+                    <th>Date Ordered</th>
+                    <th>Supplier</th>
+                    <th>Date Received</th>
+                    <th>Items</th>
+                    <th>Total Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for po in purchase_orders %}
+                <tr>
+                    <td class="invoice-number">{{ po.id }}</td>
+                    <td>{{ po.date_created|date:"M d, Y" }}</td>
+                    <td>{{ po.supplier_name }}</td>
+                    <td>
+                        {% if po.date_received %}
+                            {{ po.date_received|date:"M d, Y" }}
+                        {% else %}
+                            {{ po.date_created|date:"M d, Y" }}
+                        {% endif %}
+                    </td>
+                    <td>{{ po.purchaseitem_set.count }}</td>
+                    <td class="amount">₱{{ po.total_cost|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <i class="bi bi-graph-up" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;"></i>
+            <h3>No purchase data found</h3>
+            <p>No received purchase records match your current filters.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}

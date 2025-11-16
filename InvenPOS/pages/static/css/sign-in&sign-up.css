@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap');
+
+:root {
+  /* FONTS */
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Roboto', sans-serif;
+
+  /* COLORS */
+  --primary-bg: #ffffff;
+  --secondary-bg: #ecfadc;
+  --text-primary: #1f1f1f;
+  --text-secondary: #555555;
+  --border: #d6d6d6;
+  --accent-green: #aedcae;
+  --accent-green-light: #ddf2d1;
+  --accent-green-dark: #9fd4a3;
+  --danger: #dc3545;
+  --black: #000000;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(to right, var(--accent-green-light) 0%, transparent 25%),
+              linear-gradient(to left, var(--accent-green-light) 0%, transparent 25%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  background-color: var(--secondary-bg);
+  width: 50%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(174, 220, 174, 0.4);
+  transition: all 0.3s ease;
+}
+
+/* LEFT PANEL */
+.image-left {
+  flex: 1;
+  background-color: var(--accent-green-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.image-left h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.image-left h3 {
+  font-size: 1.25rem;
+  font-weight: 400;
+  font-family: var(--font-heading);
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.image-left img {
+  width: 80%;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+/* FORM SIDE */
+form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 2.5rem;
+  justify-content: center;
+}
+
+form label {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  letter-spacing: 0.5px;
+}
+
+form input {
+  padding: 0.75rem;
+  margin: 0.5rem 0 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--primary-bg);
+  width: 100%;
+}
+
+form button {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  font-family: var(--font-heading);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--accent-green);
+  color: var(--primary-bg);
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: var(--accent-green-dark);
+  cursor: pointer;
+}
+
+/* ============ RESPONSIVE BREAKPOINTS ============ */
+
+/* Tablet and below (≤1024px) */
+@media (max-width: 1024px) {
+  .container {
+    width: 70%;
+  }
+  .image-left h2 {
+    font-size: 1.5rem;
+  }
+  .image-left h3 {
+    font-size: 1rem;
+  }
+  form {
+    padding: 2rem;
+  }
+}
+
+/* Mobile (≤768px) */
+@media (max-width: 768px) {
+  body {
+    height: auto;
+    background: var(--accent-green-light);
+    padding: 1rem;
+  }
+
+  .container {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+  }
+
+  .image-left {
+    padding: 1rem;
+  }
+
+  .image-left img {
+    width: 60%;
+    margin: 1rem 0;
+  }
+
+  form {
+    width: 100%;
+    padding: 1.5rem;
+  }
+
+  form button {
+    width: 100%;
+  }
+}
+
+/* Extra small phones (≤480px) */
+@media (max-width: 480px) {
+  .image-left h2 {
+    font-size: 1.25rem;
+  }
+  .image-left h3 {
+    font-size: 0.9rem;
+  }
+  form input {
+    font-size: 0.9rem;
+  }
+  form button {
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,465 @@
+{% extends 'navigation/navbar.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="products-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Admin Dashboard</h1>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <!-- Total Sales -->
+    <div class="stat-card">
+      <div class="stat-label">Total Sales</div>
+      <div class="stat-value">₱{{ total_sales|floatformat:2 }}</div>
+      <div class="stat-label">All Time Revenue</div>
+    </div>
+
+    <!-- Total Purchases -->
+    <div class="stat-card">
+      <div class="stat-label">Total Purchases</div>
+      <div class="stat-value">₱{{ total_purchases|floatformat:2 }}</div>
+      <div class="stat-label">Inventory Costs</div>
+    </div>
+
+  
+    <!-- Profit -->
+    <div class="stat-card">
+      <div class="stat-label">Net Profit</div>
+      <div class="stat-value">₱{{ total_profit|floatformat:2 }}</div>
+      <div class="stat-label">Gross Earnings</div>
+    </div>
+
+    <!-- Today's Sales -->
+    <div class="stat-card">
+      <div class="stat-label">Today's Sales</div>
+      <div class="stat-value">₱{{ today_sales|floatformat:2 }}</div>
+      <div class="stat-label">{{ today_orders }} Transactions</div>
+    </div>
+
+    <!-- Inventory Value -->
+    <div class="stat-card">
+      <div class="stat-label">Inventory Value</div>
+      <div class="stat-value">₱{{ inventory_value|floatformat:2 }}</div>
+      <div class="stat-label">Current Stock Worth</div>
+    </div>
+
+      <!-- Total Products -->
+    <div class="stat-card">
+      <div class="stat-label">Total Products</div>
+      <div class="stat-value">{{ total_products }}</div>
+      <div class="stat-label">In Stock Items</div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div class="stat-card">
+      <div class="stat-label">Low Stock</div>
+      <div class="stat-value">{{ low_stock_count }}</div>
+      <div class="stat-label">Products need restocking</div>
+    </div>
+
+     <!-- Categories -->
+    <div class="stat-card">
+      <div class="stat-label">
+        Categories
+      </div>
+       <div class="stat-value">{{ total_categories }}</div>
+      <div class="stat-label">Product categories</div>
+    </div>
+
+      <!-- Pending Orders -->
+    <div class="stat-card">
+      <div class="stat-label">
+        Pending
+      </div>
+      <div class="stat-value">{{ pending_orders }}</div>
+      <div class="stat-label">Purchase orders</div>
+    </div>
+  </div>
+
+  
+  <!-- Recent Activity Section -->
+  <div class="dashboard-content">
+    <!-- Recent Sales -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <h3>Recent Sales</h3>
+        <a href="{% url 'pages:sales_list' %}" class="view-all">View All</a>
+      </div>
+      <div class="activity-list">
+        {% for sale in recent_sales %}
+        <div class="activity-item">
+          <div class="activity-icon sale">
+            <i class="bi bi-receipt"></i>
+          </div>
+          <div class="activity-details">
+            <strong>Order #{{ sale.invoice_number }}</strong>
+            <span>₱{{ sale.total_amount|floatformat:2 }}</span>
+            <small>{{ sale.date_issued|timesince }} ago</small>
+          </div>
+        </div>
+        {% empty %}
+        <div class="empty-activity">
+          <i class="bi bi-receipt"></i>
+          <p>No recent sales</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Recent Purchases -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <h3>Recent Purchases</h3>
+        <a href="{% url 'pages:purchase_management' %}" class="view-all">View All</a>
+      </div>
+      <div class="activity-list">
+        {% for purchase in recent_purchases %}
+        <div class="activity-item">
+          <div class="activity-icon purchase">
+            <i class="bi bi-cart-check"></i>
+          </div>
+          <div class="activity-details">
+            <strong>{{ purchase.supplier_name }}</strong>
+            <span>₱{{ purchase.total_cost|floatformat:2 }}</span>
+            <small>{{ purchase.date_created|timesince }} ago</small>
+          </div>
+        </div>
+        {% empty %}
+        <div class="empty-activity">
+          <i class="bi bi-cart-check"></i>
+          <p>No recent purchases</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+
+/* Stats Grid - Updated to match sales reports */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--sidebar-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--accent-green-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-value {
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    color: var(--accent-green-dark);
+    margin: 0.5rem 0;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+/* Section Headers */
+.section-header {
+    margin: 3rem 0 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.section-title {
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Quick Access Grid */
+.quick-access-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quick-card {
+    background: var(--sidebar-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.quick-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-green);
+}
+
+.quick-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+}
+
+.quick-icon.products { background: var(--accent-blue); }
+.quick-icon.sales { background: var(--accent-green); }
+.quick-icon.purchases { background: var(--accent-yellow); }
+.quick-icon.suppliers { background: var(--accent-purple); }
+.quick-icon.cashiers { background: var(--accent-orange); }
+.quick-icon.reports { background: var(--accent-teal); }
+
+.quick-content {
+    flex: 1;
+}
+
+.quick-content h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+}
+
+.quick-content p {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+.quick-badge {
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+}
+
+/* Status Grid */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.status-card {
+    background: var(--sidebar-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.status-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.status-header i {
+    font-size: 1.5rem;
+}
+
+.status-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+}
+
+.status-content h3 {
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.status-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+.status-card.stock-alert .status-header i { color: var(--accent-red); }
+.status-card.categories .status-header i { color: var(--accent-blue); }
+.status-card.pending .status-header i { color: var(--accent-yellow); }
+.status-card.users .status-header i { color: var(--accent-green); }
+
+/* Dashboard Content */
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* Activity Cards */
+.activity-card {
+    background: var(--sidebar-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    border: 1px solid var(--accent-green-light);
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.activity-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-semibold);
+}
+
+.view-all {
+    color: var(--accent-green);
+    text-decoration: none;
+    font-weight: var(--fw-medium);
+    font-size: var(--fs-sm);
+}
+
+.view-all:hover {
+    text-decoration: underline;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--primary-bg);
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.activity-item:hover {
+    background: var(--hover-bg);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+}
+
+.activity-icon.sale { background: var(--accent-green); }
+.activity-icon.purchase { background: var(--accent-green); }
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-details strong {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-weight: var(--fw-semibold);
+}
+
+.activity-details span {
+    font-weight: var(--fw-semibold);
+    color: var(--accent-green-dark);
+}
+
+.activity-details small {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+}
+
+.empty-activity {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-activity i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid,
+    .quick-access-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .products-container {
+        padding: 1rem;
+    }
+    
+    .stats-grid,
+    .quick-access-grid,
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .activity-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .view-all {
+        align-self: flex-end;
+    }
+}
+
+
+</style>
+
+<!-- Add Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'navigation/navbar.html' %}
+{% block title %}Edit Invoice{% endblock %}
+
+{% block content %}
+<div class="products-container">
+  <h2>Edit Invoice: {{ invoice.invoice_number }}</h2>
+  <form method="POST">
+    {% csrf_token %}
+
+    <!-- Staff Dropdown -->
+    <div class="mb-3">
+      <label for="staff_name"><strong>Staff:</strong></label>
+      <select name="staff_name" id="staff_name" class="form-control">
+        <option value="">-- Select Staff --</option>
+        {% for staff in staff_list %}
+          {% with full_name=staff.first_name|add:" "|add:staff.last_name %}
+          <option value="{{ full_name|default:staff.username }}" 
+                  {% if full_name|default:staff.username == invoice.staff_name %}selected{% endif %}>
+            {{ full_name|default:staff.username }}
+          </option>
+          {% endwith %}
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Date -->
+    <div class="mb-3">
+      <label><strong>Date Issued:</strong></label>
+      <input type="datetime-local" name="date_issued" class="form-control"
+             value="{{ invoice.date_issued|date:'Y-m-d\\TH:i' }}">
+    </div>
+
+    <!-- Cash and Change -->
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label><strong>Cash Received:</strong></label>
+        <input type="number" name="cash_received" step="0.01" class="form-control"
+               value="{{ invoice.cash_received }}">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label><strong>Change:</strong></label>
+        <input type="number" name="change" step="0.01" class="form-control"
+               value="{{ invoice.change }}">
+      </div>
+    </div>
+
+    <!-- Sold Items Editable Table -->
+    <h4>Sold Items</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="sold-items">
+        {% for item in sold_items %}
+        <tr>
+          <td>
+            <input type="text" name="product_name_{{ item.id }}" class="form-control"
+                   value="{{ item.product_name }}" readonly>
+          </td>
+          <td>
+            <input type="number" name="quantity_{{ item.id }}" class="form-control"
+                   value="{{ item.quantity }}" min="1">
+          </td>
+          <td>
+            <input type="number" name="unit_price_{{ item.id }}" step="0.01"
+                   class="form-control" value="{{ item.unit_price }}">
+          </td>
+          <td>
+            <input type="number" name="total_price_{{ item.id }}" step="0.01"
+                   class="form-control" value="{{ item.total_price }}" readonly>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary mt-3">Update Invoice</button>
+    <a href="{% url 'pages:sales_list' %}" class="btn btn-secondary mt-3">Cancel</a>
+  </form>
+</div>
+
+<script>
+  // Automatically compute totals when quantity or unit price changes
+  document.querySelectorAll('#sold-items input').forEach(input => {
+    input.addEventListener('input', e => {
+      const row = e.target.closest('tr');
+      const qty = parseFloat(row.querySelector('[name^="quantity_"]').value) || 0;
+      const price = parseFloat(row.querySelector('[name^="unit_price_"]').value) || 0;
+      row.querySelector('[name^="total_price_"]').value = (qty * price).toFixed(2);
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'navigation/navbar.html' %}
+{% load static %}
+
+{% block title %}Tax Management{% endblock %}
+
+{% block content %}
+<style>
+
+</style>
+
+<div class="products-container">
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">Tax Management</h1>
+        <button class="btn-add-product" data-bs-toggle="modal" data-bs-target="#addTaxModal">
+            <i class="bi bi-plus-lg"></i>
+            Add Tax Rate
+        </button>
+    </div>
+
+    <!-- TAX TABLE -->
+    <div class="table-wrapper">
+        <table class="supplier-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Percentage</th>
+                  
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tax in tax_rates %}
+                <tr>
+                    <td>{{ tax.name }}</td>
+                    <td>{{ tax.percentage }}%</td>
+                   
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editTaxModal{{ tax.id }}">
+                                Edit
+                            </button>
+                            <a href="{% url 'pages:tax_delete_inline' tax.id %}" 
+                               class="btn-action btn-delete"
+                               onclick="return confirmDelete('{{ tax.name }}')">
+                                Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="empty-row">No tax rates found. Add your first tax rate above.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include 'modals/add_tax_modal.html' %}
+{% include 'modals/edit_tax_modal.html' %}
+
+
+
+<!-- Add Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<script>
+// Modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all modal elements
+    const modals = document.querySelectorAll('.modal');
+    const modalTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
+    
+    // Function to show modal
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Add backdrop
+            const backdrop = document.createElement('div');
+          
+            document.body.appendChild(backdrop);
+            
+            // Close modal when clicking backdrop
+            backdrop.addEventListener('click', function() {
+                hideModal(modalId);
+            });
+        }
+    }
+    
+    // Function to hide modal
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Remove backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+    }
+    
+    // Add click events to modal triggers
+    modalTriggers.forEach(trigger => {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetModal = this.getAttribute('data-bs-target').replace('#', '');
+            showModal(targetModal);
+        });
+    });
+    
+    // Add click events to close buttons
+    const closeButtons = document.querySelectorAll('.btn-close, [data-bs-dismiss="modal"]');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                hideModal(modal.id);
+            }
+        });
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const openModal = document.querySelector('.modal[style="display: block;"]');
+            if (openModal) {
+                hideModal(openModal.id);
+            }
+        }
+    });
+});
+
+// Delete confirmation
+function confirmDelete(taxName) {
+    return confirm(`Are you sure you want to delete the tax rate "${taxName}"? This action cannot be undone.`);
+}
+
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const percentageInput = form.querySelector('input[name="percentage"]');
+            if (percentageInput) {
+                const percentage = parseFloat(percentageInput.value);
+                if (percentage < 0 || percentage > 100) {
+                    e.preventDefault();
+                    alert('Percentage must be between 0 and 100');
+                    percentageInput.focus();
+                    return false;
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
