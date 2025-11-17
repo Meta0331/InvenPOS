@@ -67,7 +67,7 @@
         {{ request.user.username }}
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="#">Account Settings</a></li>
+        <li><a class="dropdown-item" href="{% url 'pages:edit_profile' %}">Account Settings</a></li>
         <li><hr class="dropdown-divider"></li>
         <li>
           <form action="{% url 'pages:logout' %}" method="post" style="margin: 0;">

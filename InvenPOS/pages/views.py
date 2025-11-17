@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -1306,3 +1306,56 @@ def admin_dashboard(request):
     }
     
     return render(request, 'admin/admin_dashboard.html', context)
+
+
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        # Get form data
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        email = request.POST.get('email', '')
+        username = request.POST.get('username', '')
+        current_password = request.POST.get('current_password', '')
+        new_password = request.POST.get('new_password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        # Update basic profile information
+        user = request.user
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        
+        # Check if username is being changed and if it's available
+        if username != user.username:
+            if User.objects.filter(username=username).exclude(id=user.id).exists():
+                messages.error(request, 'Username already exists. Please choose a different one.')
+            else:
+                user.username = username
+        
+        # Handle password change if provided
+        if new_password:
+            if not current_password:
+                messages.error(request, 'Current password is required to change your password.')
+            elif not user.check_password(current_password):
+                messages.error(request, 'Current password is incorrect.')
+            elif new_password != confirm_password:
+                messages.error(request, 'New passwords do not match.')
+            elif len(new_password) < 8:
+                messages.error(request, 'Password must be at least 8 characters long.')
+            else:
+                user.set_password(new_password)
+                messages.success(request, 'Password updated successfully!')
+                # Re-authenticate user if password was changed
+                update_session_auth_hash(request, user)
+        
+        try:
+            user.save()
+            messages.success(request, 'Profile updated successfully!')
+        except Exception as e:
+            messages.error(request, f'Error updating profile: {str(e)}')
+        
+        return redirect('pages:edit_profile')
+    
+    return render(request, 'admin/edit_profile.html')

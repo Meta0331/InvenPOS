@@ -4,6 +4,7 @@ from .views import authView, home, custom_login, admin_dashboard, cashier_dashbo
 from django.urls import path
 from . import views
 from django.urls import path
+from django.contrib.auth import update_session_auth_hash
 
 urlpatterns = [
     path("", home, name="home"),
@@ -81,4 +82,6 @@ path('cashiers/edit/<int:pk>/', views.edit_cashier, name='edit_cashier'),
 path('cashiers/delete/<int:pk>/', views.delete_cashier, name='delete_cashier'),
 path('cashiers/deactivate/<int:pk>/', views.deactivate_cashier, name='deactivate_cashier'),
 path('cashiers/activate/<int:pk>/', views.activate_cashier, name='activate_cashier'),
+
+path('edit-profile/', views.edit_profile, name='edit_profile'),
 ]

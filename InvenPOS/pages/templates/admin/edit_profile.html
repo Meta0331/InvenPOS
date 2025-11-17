@@ -1,0 +1,344 @@
+{% extends 'navigation/navbar.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="products-container">
+  <div class="page-header">
+    <h1 class="page-title">Edit Profile</h1>
+  </div>
+
+  <div class="profile-container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <div class="profile-info">
+          <h2>{{ user.get_full_name|default:user.username }}</h2>
+          <p>{{ user.email|default:"No email set" }}</p>
+          <span class="profile-role">
+            {% if user.is_superuser %}
+            Administrator
+            {% elif user.is_staff %}
+            Staff
+            {% else %}
+            Cashier
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <form method="POST" class="profile-form">
+        {% csrf_token %}
+        
+        {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-section">
+          <h3 class="section-title">Personal Information</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="first_name" class="form-label">First Name</label>
+              <input type="text" id="first_name" name="first_name" class="form-input" 
+                     value="{{ user.first_name }}" placeholder="Enter your first name">
+            </div>
+            
+            <div class="form-group">
+              <label for="last_name" class="form-label">Last Name</label>
+              <input type="text" id="last_name" name="last_name" class="form-input" 
+                     value="{{ user.last_name }}" placeholder="Enter your last name">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" name="email" class="form-input" 
+                   value="{{ user.email }}" placeholder="Enter your email address">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Account Information</h3>
+          
+          <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" name="username" class="form-input" 
+                   value="{{ user.username }}" placeholder="Enter your username" required>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Change Password</h3>
+          <p class="section-description">Leave blank to keep current password</p>
+          
+          <div class="form-group">
+            <label for="current_password" class="form-label">Current Password</label>
+            <input type="password" id="current_password" name="current_password" 
+                   class="form-input" placeholder="Enter current password">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="new_password" class="form-label">New Password</label>
+              <input type="password" id="new_password" name="new_password" 
+                     class="form-input" placeholder="Enter new password">
+            </div>
+            
+            <div class="form-group">
+              <label for="confirm_password" class="form-label">Confirm Password</label>
+              <input type="password" id="confirm_password" name="confirm_password" 
+                     class="form-input" placeholder="Confirm new password">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">
+            <i class="bi bi-check-lg"></i>
+            Update Profile
+          </button>
+          <a href="{% url 'pages:home' %}" class="btn-secondary">
+            <i class="bi bi-x-lg"></i>
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+
+.profile-card {
+  background: var(--sidebar-bg);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.profile-header {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+  color: white;
+  padding: 2.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.profile-info h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: var(--fw-semibold);
+}
+
+.profile-info p {
+  margin: 0 0 0.5rem 0;
+  opacity: 0.9;
+}
+
+.profile-role {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: var(--fw-medium);
+}
+
+.profile-form {
+  padding: 2rem;
+}
+
+.form-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent-green-light);
+}
+
+.section-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: -0.5rem 0 1rem 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: var(--fw-medium);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  background: var(--primary-bg);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px var(--accent-green-light);
+}
+
+.form-input:read-only {
+  background: var(--secondary-bg);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.btn-primary {
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--accent-green-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 195, 123, 0.3);
+}
+
+.btn-secondary {
+  background: var(--secondary-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+  transform: translateY(-1px);
+}
+
+.messages {
+  margin-bottom: 2rem;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.alert-success {
+  background: var(--accent-green-light);
+  color: var(--accent-green-dark);
+  border: 1px solid var(--accent-green);
+}
+
+.alert-error {
+  background: var(--alert-red-light);
+  color: var(--alert-red-dark);
+  border: 1px solid var(--alert-red);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-form {
+    padding: 1.5rem;
+  }
+  
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+}
+</style>
+
+<!-- Add Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
